@@ -1,22 +1,54 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
-
+// 原因：在路由中添加了相同的路由。
+// 解决：重写路由的push方法
+// 解决路由命名冲突的方法
+const routerPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(error => error)
+}
+import Index from '@/views/Index'
 Vue.use(VueRouter)
 
-  const routes = [
+
+const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    redirect: '/home',
+    name: 'home',
+    component: Index,
+    children: [
+      {
+        path: 'home',
+        component: () => import('@/views/Home')
+      },
+      {
+        path: 'goods',
+        component: () => import('@/views/Goods')
+      },
+      {
+        path: 'thanks',
+        component: () => import('@/views/Thanks')
+      },
+      {
+        path: 'goodsDetail',
+        name: 'goodsDetail',
+        component: () => import('@/views/GoodsDetail')
+      }
+    ]
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/Login')
+  },
+  {
+    path: '/user',
+    name: 'user',
+    component: () => import('@/views/User'),
+    meta: {
+      auth: true
+    }
   }
 ]
 
